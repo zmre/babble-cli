@@ -41,7 +41,7 @@ impl Twitter {
         let tweets = egg_mode::tweet::user_timeline(self.user_id, true, true, &self.token)
             .with_page_size(15);
         let (_tweets, feed) = tweets.start().await?;
-        self.print_feed(&ui, feed.iter()).await;
+        self.print_feed(&ui, feed.iter().rev()).await;
         Ok(())
     }
 
@@ -51,26 +51,26 @@ impl Twitter {
             .iter()
             .find(|l| l.name == list_name)
             .ok_or(anyhow!("List not found"))?;
-        let mut tweets = egg_mode::list::statuses(ListID::from_id(list.id), true, &self.token)
+        let tweets = egg_mode::list::statuses(ListID::from_id(list.id), true, &self.token)
             .with_page_size(15);
         let (_tweets, feed) = tweets.start().await?;
-        self.print_feed(&ui, feed.iter()).await;
+        self.print_feed(&ui, feed.iter().rev()).await;
         Ok(())
     }
 
-    pub(crate) async fn home(&self, ui: &UI) -> Result<()> {
-        let home = egg_mode::tweet::home_timeline(&self.token).with_page_size(15);
-        let (_home, feed) = home.start().await?;
-        self.print_feed(&ui, feed.iter()).await;
-        Ok(())
-    }
+    // pub(crate) async fn home(&self, ui: &UI) -> Result<()> {
+    //     let home = egg_mode::tweet::home_timeline(&self.token).with_page_size(15);
+    //     let (_home, feed) = home.start().await?;
+    //     self.print_feed(&ui, feed.iter().rev()).await;
+    //     Ok(())
+    // }
 
     pub(crate) async fn home_stream(&self, ui: &UI) -> Result<()> {
         let mut home = egg_mode::tweet::home_timeline(&self.token).with_page_size(15);
         let tmp = home.start().await?;
         home = tmp.0;
         let mut feed = tmp.1;
-        self.print_feed(&ui, feed.iter()).await;
+        self.print_feed(&ui, feed.iter().rev()).await;
 
         loop {
             let tmp = home.newer(None).await?;
@@ -78,7 +78,7 @@ impl Twitter {
             home = tmp.0;
             feed = tmp.1;
             // let mut max_id = home.max_id;
-            self.print_feed(&ui, feed.iter()).await;
+            self.print_feed(&ui, feed.iter().rev()).await;
             sleep(Duration::from_millis(120000)).await;
 
             // timeline.reset()
@@ -87,7 +87,10 @@ impl Twitter {
         Ok(())
     }
 
-    pub(crate) async fn print_feed(&self, ui: &UI, feed: core::slice::Iter<'_, Tweet>) {
+    pub(crate) async fn print_feed<'a, I>(&self, ui: &UI, feed: I)
+    where
+        I: Iterator<Item = &'a Tweet>,
+    {
         for status in feed {
             ui.print_tweet(status).await;
         }
