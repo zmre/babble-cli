@@ -8,8 +8,8 @@ use tokio::time::{sleep, Duration};
 use crate::{ui::UI, MyConfig};
 
 const AUTH_TOKENS_FILE: &'static str = ".twitter_cli_oauth";
-const CONSUMER_KEY: &'static str = include_str!("consumer_key.in");
-const CONSUMER_SECRET: &'static str = include_str!("consumer_secret.in");
+//const CONSUMER_KEY: &'static str = include_str!("consumer_key.in");
+//const CONSUMER_SECRET: &'static str = include_str!("consumer_secret.in");
 
 pub(crate) struct Twitter {
     token: egg_mode::Token,
