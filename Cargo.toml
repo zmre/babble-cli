@@ -40,7 +40,6 @@ chrono = "^0.4"
 chrono-english = "^0.1"
 
 # Advanced display libraries
-tui = "0.15.0"
 termion = "1.5"
 figlet-rs = "0.1.3"
 

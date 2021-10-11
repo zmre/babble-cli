@@ -8,6 +8,7 @@ extern crate simplelog;
 use anyhow::Result;
 use clap_verbosity_flag::Verbosity;
 use confy::ConfyError;
+use egg_mode::tweet::Timeline;
 use serde::{Deserialize, Serialize};
 use simplelog::*;
 use std::io::Write;
@@ -34,9 +35,14 @@ struct Cli {
     #[structopt(flatten)]
     verbose: Verbosity,
 
+    /// Stream the feed
+    #[structopt(short, long)]
+    stream: bool,
+
     #[structopt(subcommand)]
     cmd: Option<Command>,
 }
+
 #[derive(Debug, StructOpt)]
 enum Command {
     /// Stream home feed
@@ -88,29 +94,23 @@ async fn run() -> Result<()> {
 
     debug!("Got config {:?}", cfg);
 
-    // Initialize TUI
-    // let mut tui = ui::TUI::new()?;
-
     // Init UI
     let ui = ui::UI::new();
 
     // Initialize Twitter
     let twitter = twitter::Twitter::init(&cfg).await?;
 
-    match args.cmd {
-        None | Some(Command::Home) => {
-            twitter.home_stream(&ui).await?;
-        }
-        Some(Command::List { name }) => {
-            twitter.list(&ui, &name).await?;
-        }
-        Some(Command::Me) => {
-            twitter.me(&ui).await?;
-        }
-    }
+    let timeline: Timeline = match args.cmd {
+        None | Some(Command::Home) => twitter.home().await,
+        Some(Command::List { name }) => twitter.list(&name).await,
+        Some(Command::Me) => twitter.me().await,
+    }?;
 
-    //twitter.home(&ui).await?;
-    // tui.run_loop()?;
+    if args.stream {
+        twitter.timeline_stream(timeline, &ui, 15).await?;
+    } else {
+        twitter.timeline_print(timeline, &ui, 15).await?;
+    }
 
     Ok(())
 }

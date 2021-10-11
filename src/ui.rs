@@ -1,52 +1,5 @@
-use anyhow::Result;
 use egg_mode::entities::{MediaEntity, UrlEntity};
-use std::io::{self, Stdout};
-use termion::input::{Events, MouseTerminal};
-use termion::raw::{IntoRawMode, RawTerminal};
-// use termion::screen::AlternateScreen;
 use termion::{color, style};
-use tui::backend::TermionBackend;
-use tui::widgets::{Block, Borders};
-use tui::Terminal;
-
-pub(crate) struct TUI {
-    // terminal: Terminal<TermionBackend<AlternateScreen<MouseTerminal<RawTerminal<Stdout>>>>>,
-    terminal: Terminal<TermionBackend<MouseTerminal<RawTerminal<Stdout>>>>,
-}
-
-impl TUI {
-    pub(crate) fn new() -> Result<Self> {
-        //
-        let stdout = io::stdout().into_raw_mode()?;
-        let stdout = MouseTerminal::from(stdout);
-        //let stdout = AlternateScreen::from(stdout);
-        let backend = TermionBackend::new(stdout);
-        Ok(Self {
-            terminal: Terminal::new(backend)?,
-        })
-    }
-    pub(crate) fn run_loop(&mut self) -> Result<()> {
-        self.terminal.clear();
-        self.terminal.draw(|f| {
-            let size = f.size();
-            let block = Block::default().title("Block").borders(Borders::ALL);
-            f.render_widget(block, size);
-        })?;
-        // loop {
-        // match events.next()? {
-        // Event::Input(input) => {
-        // if input == Key::Char('q') {
-        // break;
-        // }
-        // }
-        // Event::Tick => {
-        // app.update();
-        // }
-        // }
-        // }
-        Ok(())
-    }
-}
 
 pub(crate) struct ColorConfig {
     color_user: String,
@@ -75,6 +28,7 @@ impl ColorConfig {
         Self::colorize(&self.color_hash, s)
     }
 }
+
 impl Default for ColorConfig {
     fn default() -> ColorConfig {
         ColorConfig {
@@ -204,8 +158,6 @@ impl UI {
                 self.colorize_tweet_text(&tweet.text, &tweet.entities.urls, &tweet.entities.media)
             )
         };
-
-        let blankline = "\n";
 
         header + &meta + &context + &tweet //+ blankline
     }

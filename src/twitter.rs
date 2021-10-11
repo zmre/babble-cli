@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use egg_mode::{
     list::{List, ListID},
-    tweet::Tweet,
+    tweet::{Timeline, Tweet},
 };
 use tokio::time::{sleep, Duration};
 
@@ -35,59 +35,71 @@ impl Twitter {
         })
     }
 
-    pub(crate) async fn me(&self, ui: &UI) -> Result<()> {
+    pub(crate) async fn me(&self) -> Result<Timeline> {
         // TODO: include likes
         // egg_mode::tweet::liked_by<T: Into<UserID>>(acct: T, token: &Token) -> Timeline
-        let tweets = egg_mode::tweet::user_timeline(self.user_id, true, true, &self.token)
-            .with_page_size(15);
-        let (_tweets, feed) = tweets.start().await?;
-        self.print_feed(&ui, feed.iter().rev()).await;
-        Ok(())
+        Ok(egg_mode::tweet::user_timeline(
+            self.user_id,
+            true,
+            true,
+            &self.token,
+        ))
     }
 
-    pub(crate) async fn list(&self, ui: &UI, list_name: &str) -> Result<()> {
+    pub(crate) async fn list(&self, list_name: &str) -> Result<Timeline> {
         let lists = egg_mode::list::list(self.user_id, true, &self.token).await?;
         let list: &List = (*lists)
             .iter()
-            .find(|l| l.name == list_name)
+            .find(|l| l.name.to_lowercase() == list_name.to_lowercase())
             .ok_or(anyhow!("List not found"))?;
-        let tweets = egg_mode::list::statuses(ListID::from_id(list.id), true, &self.token)
-            .with_page_size(15);
+        Ok(egg_mode::list::statuses(
+            ListID::from_id(list.id),
+            true,
+            &self.token,
+        ))
+    }
+
+    pub(crate) async fn home(&self) -> Result<Timeline> {
+        Ok(egg_mode::tweet::home_timeline(&self.token))
+    }
+
+    pub(crate) async fn timeline_print(
+        &self,
+        timeline: Timeline,
+        ui: &UI,
+        page_size: i32,
+    ) -> Result<()> {
+        let tweets = timeline.with_page_size(page_size);
         let (_tweets, feed) = tweets.start().await?;
         self.print_feed(&ui, feed.iter().rev()).await;
         Ok(())
     }
 
-    // pub(crate) async fn home(&self, ui: &UI) -> Result<()> {
-    //     let home = egg_mode::tweet::home_timeline(&self.token).with_page_size(15);
-    //     let (_home, feed) = home.start().await?;
-    //     self.print_feed(&ui, feed.iter().rev()).await;
-    //     Ok(())
-    // }
-
-    pub(crate) async fn home_stream(&self, ui: &UI) -> Result<()> {
-        let mut home = egg_mode::tweet::home_timeline(&self.token).with_page_size(15);
-        let tmp = home.start().await?;
-        home = tmp.0;
+    pub(crate) async fn timeline_stream(
+        &self,
+        timeline: Timeline,
+        ui: &UI,
+        page_size: i32,
+    ) -> Result<()> {
+        let mut tweets = timeline.with_page_size(page_size);
+        let tmp = tweets.start().await?;
+        tweets = tmp.0;
         let mut feed = tmp.1;
         self.print_feed(&ui, feed.iter().rev()).await;
 
         loop {
-            let tmp = home.newer(None).await?;
+            let tmp = tweets.newer(None).await?;
             // TODO: handle twitter's backoff response properly
-            home = tmp.0;
+            tweets = tmp.0;
             feed = tmp.1;
             // let mut max_id = home.max_id;
             self.print_feed(&ui, feed.iter().rev()).await;
             sleep(Duration::from_millis(120000)).await;
-
-            // timeline.reset()
-            // let (home, _new_posts) = timeline.older(Some(max_id)).await.unwrap();
         }
         Ok(())
     }
 
-    pub(crate) async fn print_feed<'a, I>(&self, ui: &UI, feed: I)
+    async fn print_feed<'a, I>(&self, ui: &UI, feed: I)
     where
         I: Iterator<Item = &'a Tweet>,
     {
