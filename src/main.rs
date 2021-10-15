@@ -39,6 +39,10 @@ struct Cli {
     #[structopt(short, long)]
     stream: bool,
 
+    /// Output in markdown format
+    #[structopt(short, long)]
+    markdown: bool,
+
     #[structopt(subcommand)]
     cmd: Option<Command>,
 }
@@ -98,7 +102,13 @@ async fn run() -> Result<()> {
     let ui = ui::UI::new();
 
     // Initialize Twitter
+    if args.markdown {
+        println!("```\n");
+    }
     let twitter = twitter::Twitter::init(&cfg).await?;
+    if args.markdown {
+        println!("```\n");
+    }
 
     let timeline: Timeline = match args.cmd {
         None | Some(Command::Home) => twitter.home().await,
@@ -107,9 +117,13 @@ async fn run() -> Result<()> {
     }?;
 
     if args.stream {
-        twitter.timeline_stream(timeline, &ui, 15).await?;
+        twitter
+            .timeline_stream(timeline, &ui, 15, args.markdown)
+            .await?;
     } else {
-        twitter.timeline_print(timeline, &ui, 15).await?;
+        twitter
+            .timeline_print(timeline, &ui, 15, args.markdown)
+            .await?;
     }
 
     Ok(())

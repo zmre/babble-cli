@@ -68,10 +68,11 @@ impl Twitter {
         timeline: Timeline,
         ui: &UI,
         page_size: i32,
+        markdown: bool,
     ) -> Result<()> {
         let tweets = timeline.with_page_size(page_size);
         let (_tweets, feed) = tweets.start().await?;
-        self.print_feed(&ui, feed.iter().rev()).await;
+        self.print_feed(&ui, feed.iter().rev(), markdown).await;
         Ok(())
     }
 
@@ -80,12 +81,13 @@ impl Twitter {
         timeline: Timeline,
         ui: &UI,
         page_size: i32,
+        markdown: bool,
     ) -> Result<()> {
         let mut tweets = timeline.with_page_size(page_size);
         let tmp = tweets.start().await?;
         tweets = tmp.0;
         let mut feed = tmp.1;
-        self.print_feed(&ui, feed.iter().rev()).await;
+        self.print_feed(&ui, feed.iter().rev(), markdown).await;
 
         loop {
             let tmp = tweets.newer(None).await?;
@@ -93,18 +95,22 @@ impl Twitter {
             tweets = tmp.0;
             feed = tmp.1;
             // let mut max_id = home.max_id;
-            self.print_feed(&ui, feed.iter().rev()).await;
+            self.print_feed(&ui, feed.iter().rev(), markdown).await;
             sleep(Duration::from_millis(120000)).await;
         }
         Ok(())
     }
 
-    async fn print_feed<'a, I>(&self, ui: &UI, feed: I)
+    async fn print_feed<'a, I>(&self, ui: &UI, feed: I, markdown: bool)
     where
         I: Iterator<Item = &'a Tweet>,
     {
         for status in feed {
-            ui.print_tweet(status).await;
+            if markdown {
+                ui.print_tweet_markdown(status).await;
+            } else {
+                ui.print_tweet(status).await;
+            }
         }
     }
 }
