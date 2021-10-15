@@ -21,6 +21,8 @@ It also still needs some work to make the code cleaner, but given that it works 
 
 ## Usage
 
+On first use, you'll be prompted for a Twitter "consumer key" and a "consumer secret." These are required and you can get them for free by going to [Twitter's Developer Portal](https://developer.twitter.com/en/portal/dashboard) and creating a project. Once setup is out of the way, you can use it:
+
 Here are some of the arguments I use when I run it:
 
 ```
@@ -29,6 +31,33 @@ babble-cli list -n Boulder\ News
 babble-cli --stream list -n Security
 babble-cli --markdown me
 ```
+
+## Example output with markdown
+
+### **[@TIME](https://twitter.com/TIME)** TIME at 2021-10-15 15:33:00 -06:00 ♺:5 ♥:11 _via Sprinklr_
+MIT reckons with early leader's role in forced removal of Native American tribes [ti.me](https://ti.me/3aIP5FS)
+
+### **[@TheArtOfCharm](https://twitter.com/TheArtOfCharm)** The Art of Charm | Communicate powerfully at 2021-10-15 15:33:00 -06:00 ♺:0 ♥:1 _via Sprout Social_
+Struggling with a late team member? Instead of saying: "I need this done tomorrow." Try saying: "What would help you get this done tomorrow?" People don't like being told what to do, but they do like solving problems. Who's gonna try this next week? 🙌 **#ArtofCharm** **#Manager**
+
+### **[@ColoradoSun](https://twitter.com/ColoradoSun)** The Colorado Sun at 2021-10-15 15:33:01 -06:00 ♺:0 ♥:3 _via Buffer_
+CARTOON | Slavery wasn't an identity, it was something done to mothers, fathers, daughters and sons. [buff.ly](https://buff.ly/30oz1Hb)
+
+### **[@SwiftOnSecurity](https://twitter.com/SwiftOnSecurity)** 🆘 at 2021-10-15 15:33:18 -06:00 ♺:0 ♥:6 _via Twitter for iPhone_
+➜ In reply to [tweet by @SwiftOnSecurity](https://twitter.com/SwiftOnSecurity/status/1449123811845197834)
+It's one of concerns I have about budget allocations to cybersecurity in government. I can command an all-expenses-paid trip to New York for the chance to talk to me. You need to up your commitment. I'd readily forgo that to serve the common good. You're making it hard. ![pbs.twimg.com](https://pbs.twimg.com/ext_tw_video_thumb/1449126184911003652/pu/img/r3h5Gox8meicRxA8.jpg)
+
+### **[@guardian](https://twitter.com/guardian)** The Guardian at 2021-10-15 15:33:26 -06:00 ♺:4 ♥:8 _via Echobox_
+New Zealand's weird and wonderful vaccine rollout [www.theguardian.com](https://www.theguardian.com/world/2021/oct/16/new-zealands-weird-and-wonderful-vaccine-rollout?utm_term=Autofeed&CMP=twt_gu&utm_medium&utm_source=Twitter#Echobox=1634322775)
+
+### **[@Reuters](https://twitter.com/Reuters)** Reuters at 2021-10-15 15:35:20 -06:00 ♺:4 ♥:4 _via True Anthem_
+Blast at Shi'ite mosque in Afghan city of Kandahar kills dozens [reut.rs](http://reut.rs/3lKTmyR) ![pbs.twimg.com](https://pbs.twimg.com/media/FBxVHofX0AkJkXi.jpg)
+
+
+
+## Example output in the terminal
+
+![screenshot of terminal output](screenshot.png)
 
 ## TODO
 
